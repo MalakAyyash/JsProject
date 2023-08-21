@@ -13,6 +13,8 @@ let sidebarLink2 = document.getElementById('sidebarLink2')
 let sidebarLink1 = document.getElementById('sidebarLink1')
 let invalidPassword = document.getElementById('invalid-password')
 let invalidConfirmPassword = document.getElementById('invalidConfirmPassword')
+let date = document.getElementById('date')
+
 let currentIndex=0
 // ============================================================
 const firebaseConfig = {
@@ -33,9 +35,9 @@ main2.style.display = 'none'
 document.getElementById("objectForm").addEventListener("submit", submitForm);  
 function submitForm(e) {
     e.preventDefault();
-    saveMessages(title.value, description.value, password.value);
+    saveMessages(title.value, date.value, description.value, password.value);
   }
-  const saveMessages = (title, description ,password) => {
+  const saveMessages = (title, date, description ,password) => {
     invalidPassword.style.display = 'none'
 
     var regex = /(?=.*[a-z])(?=.*[A-Z])(?=.*\W).{8,}$/;
@@ -44,6 +46,7 @@ function submitForm(e) {
         var newContactForm = contactFormDB.push();
         newContactForm.set({
           title: title,
+          date: date,
           description: description,
           password: password,
         })
@@ -70,6 +73,8 @@ function resetInput(){
     title.value = ''
     description.value = ''
     password.value = ''
+    date.value = ''
+
 }
 // =====================display data========================
 function fetchFirebaseData() {
@@ -78,10 +83,11 @@ function fetchFirebaseData() {
             const dataArray = [];
             AllRecords.forEach(function(currentRecord) {
                 const title = currentRecord.val().title;
+                const date = currentRecord.val().date;
                 const password = currentRecord.val().password;
                 const description = currentRecord.val().description;
                 const key = currentRecord.key;
-                dataArray.push({ key: key, title: title, password: password, description: description });
+                dataArray.push({ key: key, title: title, date: date, password: password, description: description });
             });
             resolve(dataArray);
         }, reject);
@@ -102,10 +108,11 @@ async function displayData() {
                         <button type="button" class="btn-close" aria-label="Close" onclick="deleteData(${i})"></button>
                     </div>
                         <h2 class="mb-4 d-flex justify-content-center">${data[i].title}</h2>
-                        <h3 class="mb-4 d-flex justify-content-center">${pass[i]}</h3>
+                        <h4 class="mb-4 d-flex justify-content-center">${data[i].date}</h4>
+                        <h5 class="mb-4 d-flex justify-content-center">${pass[i]}</h5>
                         <p class="d-flex justify-content-center">${data[i].description}</p>
                         <button class="btn btn-primary w-100 rounded-0 update-btn" onclick="updateData(${i})">Update</button>
-                        <button class="btn btn-secondary w-100 rounded-0 update-btn" onclick="restPass(${i})">Rest Password</button>
+                        <button class="btn btn-secondary w-100 rounded-0 update-btn" onclick="resetPass(${i})">Reset Password</button>
                     </div>
                 </div>
             `;
@@ -125,14 +132,16 @@ async function updateData(index){
     Swal.fire({
         title: 'Update Title and Description',
         html: `
-            <input id="updateTitle" class="swal2-input" placeholder="Update Title" value="${currentData.title}">
-            <input id="updateDescription" class="swal2-input" placeholder="Update Description" value="${currentData.description}">
+            <input id="updateTitle" type="text" class="swal2-input w-75" placeholder="Update Title" value="${currentData.title}">
+            <input id="updateDate" type="date" class="swal2-input w-75" placeholder="Update Date" value="${currentData.date}">
+            <input id="updateDescription" type="text" class="swal2-input w-75" placeholder="Update Description" value="${currentData.description}">
         `,
         showCancelButton: true,
         confirmButtonText: 'Update',
         showLoaderOnConfirm: true,
         preConfirm: async () => {
         const updatedTitle = Swal.getPopup().querySelector('#updateTitle').value;
+        const updatedDate = Swal.getPopup().querySelector('#updateDate').value;
         const updatedDescription = Swal.getPopup().querySelector('#updateDescription').value;
         try {
         const db = firebase.database();
@@ -140,6 +149,7 @@ async function updateData(index){
         firebase.database().ref(`objectForm/${currentData.key}`).once('value',(snapshot => {
             const existingData = snapshot.val();
             existingData.title = updatedTitle;
+            existingData.date = updatedDate;
             existingData.description = updatedDescription;
             firebase.database().ref(`objectForm/${currentData.key}`).set(existingData);
             }));
@@ -155,13 +165,13 @@ async function updateData(index){
     });
 }
 // ===========================reset password==============
-async function restPass(index){
+async function resetPass(index){
     let currentIndex = index
     const data = await fetchFirebaseData();
     let currentData = data[currentIndex]
     console.log(data[currentIndex])
     const SwalInstance = Swal.fire({
-        title: 'Rest Password',
+        title: 'Reset Password',
         html: `
             <input type="password" id="originalPass" class="swal2-input" placeholder="old password">
             <input type="password" id="newPassword" class="swal2-input" placeholder="new password">
@@ -171,15 +181,14 @@ async function restPass(index){
             </div>
         `,
         showCancelButton: true,
-        confirmButtonText: 'Rest',
+        confirmButtonText: 'Reset',
         showLoaderOnConfirm: true,
         preConfirm: async () => {
         const originalPass = Swal.getPopup().querySelector('#originalPass').value;
         const newPassword = Swal.getPopup().querySelector('#newPassword').value;
         const confirmPassword = Swal.getPopup().querySelector('#confirmPassword').value;
         var regex = /(?=.*[a-z])(?=.*[A-Z])(?=.*\W).{8,}$/;
-        let validateNewPassword
-        validateNewPassword = true
+        validateNewPassword = regex.test(newPassword)
          if (validateNewPassword == true){
             if ((newPassword == confirmPassword) && (originalPass == currentData.password) ){
                 try {
@@ -201,11 +210,11 @@ async function restPass(index){
                     }        }
                     else {
                         if (newPassword != confirmPassword) {
-                            // invalidConfirmPassword.style.display = 'block';
-                            SwalInstance.showValidationMessage('Please correct the confirm.');
-
+                            SwalInstance.showValidationMessage('Please correct the confirm.should be equal of the new password');
                         }
-                        // SwalInstance.showValidationMessage('Please correct the fields.');
+                        if (originalPass != currentData.password) {
+                            SwalInstance.showValidationMessage('the old password is incorrect . try again ');
+                        }
                         return false;
                     }
         }}
@@ -221,7 +230,9 @@ async function deleteData(index){
     console.log(currentData.key)
     firebase.database().ref(`objectForm/${currentData.key}`).set({
     title: null,
-    description: null
+    description: null,
+    password: null,
+    date: null
     });
     Swal.fire({
         title: 'Deleted!',

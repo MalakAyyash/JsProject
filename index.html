@@ -32,11 +32,13 @@
             <form action="/action_page.php" class="row" id="objectForm">
                 <div class="my-5 col-4">
                 <label for="title" class="mb-5">Title</label><br>
+                <label for="date" class="mb-5">Date</label><br>
                 <label for="password" class="mb-5">Password</label><br>
                 <label for="desc" class="">Description</label>
                 </div>
                 <div class="my-5 col-8">
                     <input type="text" class="mb-5 border border-4 border-black w-50" id="title" placeholder="" name="title">
+                    <input type="date" class="mb-5 border border-4 border-black w-50" id="date" name="date">
                     <input type="password" class="border border-4 border-black w-50" id="password" placeholder="" name="password" required>
                     <div class="invalid-feedback" id="invalid-password">
                         Please provide a valid password <br> [eight char ,at least  one uppercase , one lowercase and one special char ].
