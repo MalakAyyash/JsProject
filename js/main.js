@@ -28,22 +28,22 @@ const firebaseConfig = {
 };
 // initialize firebase
 firebase.initializeApp(firebaseConfig);
-// reference your database
+// reference the database
 var contactFormDB = firebase.database().ref("objectForm");
 main2.style.display = 'none'
 
 document.getElementById("objectForm").addEventListener("submit", submitForm);  
 function submitForm(e) {
     e.preventDefault();
-    saveMessages(title.value, date.value, description.value, password.value);
+    saveMessages(title.value, date.value, description.value, password.value);//save data at firebase
   }
   const saveMessages = (title, date, description ,password) => {
     invalidPassword.style.display = 'none'
 
-    var regex = /(?=.*[a-z])(?=.*[A-Z])(?=.*\W).{8,}$/;
+    var regex = /(?=.*[a-z])(?=.*[A-Z])(?=.*\W).{8,}$/;//8 char at least , contain small , capital , special char 
     validate = regex.test(password)
     if (validate == true){
-        var newContactForm = contactFormDB.push();
+        var newContactForm = contactFormDB.push();//push the data
         newContactForm.set({
           title: title,
           date: date,
@@ -56,7 +56,7 @@ function submitForm(e) {
         sidebarLink1.style.border = 'none';
         main2.style.display = 'block'
         main1.style.display = 'none'
-        Swal.fire({
+        Swal.fire({ //sweet alert 
             position: 'center',
             icon: 'success',
             title: 'data added successfully',
@@ -74,11 +74,10 @@ function resetInput(){
     description.value = ''
     password.value = ''
     date.value = ''
-
 }
 // =====================display data========================
 function fetchFirebaseData() {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => { //using ES6 
         contactFormDB.on('value', function(AllRecords) {
             const dataArray = [];
             AllRecords.forEach(function(currentRecord) {
@@ -93,23 +92,24 @@ function fetchFirebaseData() {
         }, reject);
     });
 }
-async function displayData() {
+const displayData = async () =>{ //using ES6 
     console.log("Starting displayData function");
-        const data = await fetchFirebaseData();
+        const data = await fetchFirebaseData();//fetchFirebaseData should excute first
         console.log("Fetched data from Firebase:", data);
         let result = '';
         let pass = [];
+        let cssClass='mb-4 d-flex justify-content-center'
         for (let i = 0; i < data.length; i++) {
-            pass[i] = '*'.repeat(data[i].password.length);
+            pass[i] = '*'.repeat(data[i].password.length);//replace each char of the password with *
             result += `
                 <div class="col-4">
                     <div class="card border border-4 border-black mb-3">
                     <div class="close-b">
                         <button type="button" class="btn-close" aria-label="Close" onclick="deleteData(${i})"></button>
                     </div>
-                        <h2 class="mb-4 d-flex justify-content-center">${data[i].title}</h2>
-                        <h4 class="mb-4 d-flex justify-content-center">${data[i].date}</h4>
-                        <h5 class="mb-4 d-flex justify-content-center">${pass[i]}</h5>
+                        <h2 class="${cssClass}">${data[i].title}</h2>
+                        <h4 class="${cssClass}">${data[i].date}</h4>
+                        <h5 class="${cssClass}">${pass[i]}</h5>
                         <p class="d-flex justify-content-center">${data[i].description}</p>
                         <button class="btn btn-primary w-100 rounded-0 update-btn" onclick="updateData(${i})">Update</button>
                         <button class="btn btn-secondary w-100 rounded-0 update-btn" onclick="resetPass(${i})">Reset Password</button>
@@ -117,17 +117,17 @@ async function displayData() {
                 </div>
             `;
         }
-        main2Row.innerHTML = result;
+        main2Row.innerHTML = result;//get the data from firebase and display them at the correct palce 
         console.log("Data displayed.");
 }
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function() {//dispaly the data when the page loaded 
     displayData();
 });
 // ===========================update the data ==============
 async function updateData(index){
     let currentIndex = index
     const data = await fetchFirebaseData();
-    let currentData = data[currentIndex]
+    let currentData = data[currentIndex]//the data with the current index
     console.log(data[currentIndex])
     Swal.fire({
         title: 'Update Title and Description',
@@ -140,15 +140,15 @@ async function updateData(index){
         confirmButtonText: 'Update',
         showLoaderOnConfirm: true,
         preConfirm: async () => {
-        const updatedTitle = Swal.getPopup().querySelector('#updateTitle').value;
+        const updatedTitle = Swal.getPopup().querySelector('#updateTitle').value;//get the value that are inside the alert
         const updatedDate = Swal.getPopup().querySelector('#updateDate').value;
         const updatedDescription = Swal.getPopup().querySelector('#updateDescription').value;
         try {
         const db = firebase.database();
         console.log(currentData.key)
-        firebase.database().ref(`objectForm/${currentData.key}`).once('value',(snapshot => {
+        firebase.database().ref(`objectForm/${currentData.key}`).once('value',(snapshot => {//access the firebase at a spesific position from the key
             const existingData = snapshot.val();
-            existingData.title = updatedTitle;
+            existingData.title = updatedTitle;//storr the edited data at firebase 
             existingData.date = updatedDate;
             existingData.description = updatedDescription;
             firebase.database().ref(`objectForm/${currentData.key}`).set(existingData);
@@ -189,7 +189,7 @@ async function resetPass(index){
         const confirmPassword = Swal.getPopup().querySelector('#confirmPassword').value;
         var regex = /(?=.*[a-z])(?=.*[A-Z])(?=.*\W).{8,}$/;
         validateNewPassword = regex.test(newPassword)
-         if (validateNewPassword == true){
+         if (validateNewPassword == true){//validation on password
             if ((newPassword == confirmPassword) && (originalPass == currentData.password) ){
                 try {
                     const db = firebase.database();
@@ -228,7 +228,7 @@ async function deleteData(index){
     console.log(data[currentIndex])
     const db = firebase.database();
     console.log(currentData.key)
-    firebase.database().ref(`objectForm/${currentData.key}`).set({
+    firebase.database().ref(`objectForm/${currentData.key}`).set({//put the values null to delete it from database
     title: null,
     description: null,
     password: null,
