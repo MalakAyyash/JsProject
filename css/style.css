@@ -1,0 +1,68 @@
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed, 
+figure, figcaption, footer, header, hgroup, 
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding :0;
+  border :0;
+  font-size :100%;
+  font :inherit;
+  font-style : normal;
+  vertical-align : baseline;
+}
+body, html {
+    height: 100%;
+    background-color: white;
+    box-sizing: border-box;
+    background-color: #0a101e;
+    font-family: Inter,sans-serif;
+}
+*{
+  list-style: none;
+}
+/* **************************header*************************** */
+section{
+  height: 100vh;
+  background-color: white;
+}
+.sidebar{
+    height:100vh;
+}
+.sidebar a{
+  text-decoration: none;
+}
+#sidebarLink1{
+  border: 4px solid black;
+}
+.sidebar > div{
+  height: 25%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.main{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#desc{
+  height: 200px;
+}
+.btn-close{ /*bootstrap class   */
+  border-radius: 0 !important;
+}
+.btn-close:hover{
+  background-color: red !important;
+  opacity: 1 !important; 
+}
+.close-b{
+  text-align: right;
+}
